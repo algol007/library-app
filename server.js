@@ -1,20 +1,11 @@
-const express = require("express");
-const app = express();
-const port = 8000;
-const bodyParser = require("body-parser");
-const cors = require("cors");
+const dotenv = require("dotenv");
+dotenv.config();
 
-// init app
-app.get("/", (req, res) => res.send("Hello World!"));
-app.use(bodyParser.json());
-app.use(
-  bodyParser.urlencoded({
-    extended: false
-  })
-);
+const http = require("http");
+const app = require("./app");
 
-app.use(cors());
+const port = process.env.PORT || 3000;
 
-require("./router/user")(app);
+const server = http.createServer(app);
 
-app.listen(port, () => console.log(`App running on port ${port}!`));
+server.listen(port);
