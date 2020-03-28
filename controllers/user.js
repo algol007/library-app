@@ -20,10 +20,8 @@ exports.signUp = (req, res, next) => {
         message: "User has been created!"
       });
     })
-    .catch(err => {
-      err.status(500).json({
-        message: `Error ${err}`
-      });
+    .catch(() => {
+      throw new ErrorHandler(500, "Internal server error");
     });
 };
 
@@ -49,10 +47,8 @@ exports.signIn = (req, res, next) => {
         }
       }
     })
-    .catch(err => {
-      err.status(404).json({
-        message: `User not found!`
-      });
+    .catch(() => {
+      throw new ErrorHandler(500, "Internal server error");
     });
 };
 
@@ -68,10 +64,8 @@ exports.getUserById = (req, res, next) => {
         data: data
       });
     })
-    .catch(err => {
-      err.status(404).json({
-        message: `User not found!`
-      });
+    .catch(() => {
+      throw new ErrorHandler(500, "Internal server error");
     });
 };
 
@@ -99,10 +93,8 @@ exports.updateUser = (req, res, next) => {
         data: data
       });
     })
-    .catch(err => {
-      err.status(500).json({
-        message: `Error ${err}`
-      });
+    .catch(() => {
+      throw new ErrorHandler(500, "Internal server error");
     });
 };
 
@@ -135,9 +127,7 @@ exports.deleteUser = (req, res, next) => {
         data: `User ID : ${userId}`
       });
     })
-    .catch(err => {
-      err.status(500).json({
-        message: `Error ${err}`
-      });
+    .catch(() => {
+      throw new ErrorHandler(500, "Internal server error");
     });
 };

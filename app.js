@@ -3,6 +3,7 @@ const app = express();
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const { handleError, ErrorHandler } = require("./helper/error");
 
 app.use(morgan("dev"));
 app.use(bodyParser.json());
@@ -19,19 +20,12 @@ require("./router/book")(app);
 require("./router/category")(app);
 require("./router/cart")(app);
 
-app.use((req, res, next) => {
-  const error = new Error("Not Found!");
-  error.status = 404;
-  next(error);
+app.get("/", (req, res) => {
+  throw new ErrorHandler(404, "Page Not Found");
 });
 
-app.unsubscribe((error, req, res, next) => {
-  res.status(error.status || 500);
-  res.json({
-    error: {
-      message: error.message
-    }
-  });
+app.use((err, req, res, next) => {
+  handleError(err, res);
 });
 
 module.exports = app;

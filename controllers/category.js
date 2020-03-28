@@ -1,28 +1,7 @@
 const Categories = require("../models").category;
+const Books = require("../models").book;
 const { Op } = require("sequelize");
-
-// Get all categories data
-// exports.getAllCategories = (req, res, next) => {
-//   console.log("Get all categories");
-//   Categories.findAll(
-//     // { limit: 3 },
-//     {
-//       attributes: {
-//         exclude: ["createdAt", "updatedAt"]
-//       }
-//     }
-//   )
-//     .then(data => {
-//       res.status(200).send({
-//         categories: data
-//       });
-//     })
-//     .catch(err => {
-//       err.status(500).json({
-//         message: `Error ${err}`
-//       });
-//     });
-// };
+const { handleError, ErrorHandler } = require("../helper/error");
 
 exports.getAllCategories = (req, res, next) => {
   console.log("Get all categories");
@@ -34,21 +13,24 @@ exports.getAllCategories = (req, res, next) => {
     {
       attributes: {
         exclude: ["createdAt", "updatedAt"]
+      },
+      include: {
+        model: Books,
+        as: "bookCategory",
+        attributes: ["title"]
       }
     }
   )
     .then(data => {
       const pages = Math.ceil(data.count / limit);
       res.status(200).send({
-        // pages: pages,
         page: `${page} of ${pages}`,
         categories: data
+        // error.errorHandler
       });
     })
-    .catch(err => {
-      err.status(500).json({
-        message: `Error ${err}`
-      });
+    .catch(() => {
+      throw new ErrorHandler(500, "Internal server error");
     });
 };
 
@@ -68,10 +50,8 @@ exports.getCategoryById = (req, res, next) => {
         data: data
       });
     })
-    .catch(err => {
-      err.status(500).json({
-        message: `Error ${err}`
-      });
+    .catch(() => {
+      throw new ErrorHandler(500, "Internal server error");
     });
 };
 
@@ -85,10 +65,8 @@ exports.createCategory = (req, res, next) => {
         message: "New category added!"
       });
     })
-    .catch(err => {
-      err.status(500).json({
-        message: `Error ${err}`
-      });
+    .catch(() => {
+      throw new ErrorHandler(500, "Internal server error");
     });
 };
 
@@ -111,10 +89,8 @@ exports.updateCategory = (req, res, next) => {
         message: "Category has been updated!"
       });
     })
-    .catch(err => {
-      err.status(500).json({
-        message: `Error ${err}`
-      });
+    .catch(() => {
+      throw new ErrorHandler(500, "Internal server error");
     });
 };
 
@@ -132,9 +108,7 @@ exports.deleteCategory = (req, res, next) => {
         message: "Category has been deleted!"
       });
     })
-    .catch(err => {
-      err.status(500).json({
-        message: `Error ${err}`
-      });
+    .catch(() => {
+      throw new ErrorHandler(500, "Internal server error");
     });
 };

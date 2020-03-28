@@ -14,10 +14,8 @@ exports.createCart = (req, res, next) => {
         message: "Book has been added to cart!"
       });
     })
-    .catch(err => {
-      err.status(500).json({
-        message: `Error ${err}`
-      });
+    .catch(() => {
+      throw new ErrorHandler(500, "Internal server error");
     });
 };
 
@@ -36,10 +34,8 @@ exports.getAllCart = (req, res, next) => {
         carts: data
       });
     })
-    .catch(err => {
-      err.status(500).json({
-        message: `Error ${err}`
-      });
+    .catch(() => {
+      throw new ErrorHandler(500, "Internal server error");
     });
 };
 
@@ -55,10 +51,8 @@ exports.getCartById = (req, res, next) => {
         data: data
       });
     })
-    .catch(err => {
-      err.status(500).json({
-        message: `Error ${err}`
-      });
+    .catch(() => {
+      throw new ErrorHandler(500, "Internal server error");
     });
 };
 
@@ -83,10 +77,8 @@ exports.updateCart = (req, res, next) => {
         message: "Cart has been updated!"
       });
     })
-    .catch(err => {
-      err.status(500).json({
-        message: `Error ${err}`
-      });
+    .catch(() => {
+      throw new ErrorHandler(500, "Internal server error");
     });
 };
 
@@ -103,9 +95,7 @@ exports.deleteCart = (req, res, next) => {
         message: "Cart has been deleted!"
       });
     })
-    .catch(err => {
-      err.status(500).json({
-        message: `Error ${err}`
-      });
+    .catch(() => {
+      throw new ErrorHandler(500, "Internal server error");
     });
 };

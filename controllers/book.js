@@ -23,10 +23,8 @@ exports.getAllBooks = (req, res, next) => {
           // message: orderByTitle
         });
       })
-      .catch(err => {
-        err.status(500).json({
-          message: `Error ${err}`
-        });
+      .catch(() => {
+        throw new ErrorHandler(500, "Internal server error");
       });
   } else if (orderByAuthor) {
     Books.findAll({
@@ -41,10 +39,8 @@ exports.getAllBooks = (req, res, next) => {
           // message: orderByTitle
         });
       })
-      .catch(err => {
-        err.status(500).json({
-          message: `Error ${err}`
-        });
+      .catch(() => {
+        throw new ErrorHandler(500, "Internal server error");
       });
   } else if (orderByYear) {
     Books.findAll({
@@ -59,10 +55,8 @@ exports.getAllBooks = (req, res, next) => {
           // message: orderByTitle
         });
       })
-      .catch(err => {
-        err.status(500).json({
-          message: `Error ${err}`
-        });
+      .catch(() => {
+        throw new ErrorHandler(500, "Internal server error");
       });
   } else if (search) {
     Books.findAll({
@@ -81,10 +75,8 @@ exports.getAllBooks = (req, res, next) => {
           books: data
         });
       })
-      .catch(err => {
-        err.status(500).json({
-          message: `Error ${err}`
-        });
+      .catch(() => {
+        throw new ErrorHandler(500, "Internal server error");
       });
   } else {
     Books.findAll({
@@ -98,37 +90,10 @@ exports.getAllBooks = (req, res, next) => {
           books: data
         });
       })
-      .catch(err => {
-        err.status(500).json({
-          message: `Error ${err}`
-        });
+      .catch(() => {
+        throw new ErrorHandler(500, "Internal server error");
       });
   }
-};
-
-exports.searchBooks = (req, res, next) => {
-  const result = req.params.search;
-  Books.findAll({
-    attributes: {
-      exclude: ["createdAt", "updatedAt"]
-    },
-    where: {
-      [Op.or]: [
-        { title: { [Op.substring]: result } },
-        { description: { [Op.substring]: result } }
-      ]
-    }
-  })
-    .then(data => {
-      res.status(200).send({
-        books: data
-      });
-    })
-    .catch(err => {
-      err.status(500).json({
-        message: `Error ${err}`
-      });
-    });
 };
 
 exports.getBookById = (req, res, next) => {
@@ -149,10 +114,31 @@ exports.getBookById = (req, res, next) => {
         data: data
       });
     })
-    .catch(err => {
-      err.status(500).json({
-        message: `Error ${err}`
+    .catch(() => {
+      throw new ErrorHandler(500, "Internal server error");
+    });
+};
+
+exports.getBooksByCategory = (req, res, next) => {
+  // console.log("Get all books data");
+  const categoryId = req.params.categoryId;
+
+  Books.findAll({
+    attributes: {
+      exclude: ["createdAt", "updatedAt"]
+    },
+    where: {
+      categoryId: categoryId
+    }
+  })
+    .then(data => {
+      res.status(200).send({
+        books: data
+        // message: orderByTitle
       });
+    })
+    .catch(() => {
+      throw new ErrorHandler(500, "Internal server error");
     });
 };
 
@@ -176,10 +162,8 @@ exports.createBook = (req, res, next) => {
         message: "Book has been added!"
       });
     })
-    .catch(err => {
-      err.status(500).json({
-        message: `Error ${err}`
-      });
+    .catch(() => {
+      throw new ErrorHandler(500, "Internal server error");
     });
 };
 
@@ -212,10 +196,8 @@ exports.updateBook = (req, res, next) => {
         message: "Book has been updated!"
       });
     })
-    .catch(err => {
-      err.status(500).json({
-        message: `Error ${err}`
-      });
+    .catch(() => {
+      throw new ErrorHandler(500, "Internal server error");
     });
 };
 
@@ -232,9 +214,7 @@ exports.deleteBook = (req, res, next) => {
         message: "Book has been deleted!"
       });
     })
-    .catch(err => {
-      err.status(500).json({
-        message: `Error ${err}`
-      });
+    .catch(() => {
+      throw new ErrorHandler(500, "Internal server error");
     });
 };
