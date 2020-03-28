@@ -90,10 +90,8 @@ exports.getAllBooks = (req, res, next) => {
     Books.findAll({
       attributes: {
         exclude: ["createdAt", "updatedAt"]
-      }
-      // include: {
-      // Category.findAll();
-      // }
+      },
+      include: { model: Category, as: "bookCategory", attributes: ["name"] }
     })
       .then(data => {
         res.status(200).send({

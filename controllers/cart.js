@@ -1,8 +1,11 @@
 const Carts = require("../models").cart;
+const Books = require("../models").book;
+const Users = require("../models").user;
 
 exports.createCart = (req, res, next) => {
   Carts.create({
-    book_id: req.body.book_id,
+    userId: req.body.userId,
+    bookId: req.body.bookId,
     quantity: req.body.quantity,
     total: req.body.total
   })
@@ -22,7 +25,11 @@ exports.getAllCart = (req, res, next) => {
   Carts.findAll({
     attributes: {
       exclude: ["createdAt", "updatedAt"]
-    }
+    },
+    include: [
+      { model: Books, as: "bookCart", attributes: ["title", "image", "price"] },
+      { model: Users, as: "userCart", attributes: ["name"] }
+    ]
   })
     .then(data => {
       res.status(200).json({
@@ -59,7 +66,8 @@ exports.updateCart = (req, res, next) => {
   const cartId = req.params.cartId;
   Carts.update(
     {
-      book_id: req.body.book_id,
+      userId: req.body.userId,
+      bookId: req.body.bookId,
       quantity: req.body.quantity,
       total: req.body.total
     },

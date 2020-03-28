@@ -1,4 +1,5 @@
 const Categories = require("../models").category;
+const { Op } = require("sequelize");
 
 // Get all categories data
 // exports.getAllCategories = (req, res, next) => {
@@ -25,8 +26,11 @@ const Categories = require("../models").category;
 
 exports.getAllCategories = (req, res, next) => {
   console.log("Get all categories");
-  Categories.findAll(
-    // { limit: 3 },
+  const limit = 5;
+  const page = req.query.page;
+  const offset = (page - 1) * 5;
+  Categories.findAndCountAll(
+    { offset: offset, limit: limit },
     {
       attributes: {
         exclude: ["createdAt", "updatedAt"]
@@ -34,7 +38,10 @@ exports.getAllCategories = (req, res, next) => {
     }
   )
     .then(data => {
+      const pages = Math.ceil(data.count / limit);
       res.status(200).send({
+        // pages: pages,
+        page: `${page} of ${pages}`,
         categories: data
       });
     })
