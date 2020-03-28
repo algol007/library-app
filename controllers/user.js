@@ -56,6 +56,25 @@ exports.signIn = (req, res, next) => {
     });
 };
 
+exports.getUserById = (req, res, next) => {
+  const userId = req.params.userId;
+  Users.findOne({
+    where: {
+      id: userId
+    }
+  })
+    .then(data => {
+      res.status(200).send({
+        data: data
+      });
+    })
+    .catch(err => {
+      err.status(404).json({
+        message: `User not found!`
+      });
+    });
+};
+
 exports.updateUser = (req, res, next) => {
   const salt = bcrypt.genSaltSync(10);
   const userId = req.params.userId;
