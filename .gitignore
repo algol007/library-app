@@ -1,6 +1,7 @@
 # Don't track content of these folders
 .DS_Store
 node_modules
+/node_modules
 /dist
 config
 
