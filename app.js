@@ -12,7 +12,6 @@ app.use(
     extended: false
   })
 );
-
 app.use(cors());
 
 require("./router/user")(app);
@@ -20,7 +19,11 @@ require("./router/book")(app);
 require("./router/category")(app);
 require("./router/cart")(app);
 
-app.get("/", (req, res) => {
+app.get("/error", (err, req, res, next) => {
+  throw new ErrorHandler(500, "Internal server error");
+});
+
+app.get("*", (req, res) => {
   throw new ErrorHandler(404, "Page Not Found");
 });
 

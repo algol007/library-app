@@ -34,25 +34,34 @@ exports.getAllCategories = (req, res, next) => {
     });
 };
 
-exports.getCategoryById = (req, res, next) => {
+exports.getCategoryById = async (req, res, next) => {
   const categoryId = req.params.categoryId;
   // console.log(eventName);
-  Categories.findOne({
-    attributes: {
-      exclude: ["createdAt", "updatedAt"]
-    },
-    where: {
-      id: categoryId
-    }
-  })
-    .then(data => {
-      res.status(200).send({
-        data: data
-      });
-    })
-    .catch(() => {
-      throw new ErrorHandler(500, "Internal server error");
+  try {
+    const category = await Categories.findOne({
+      where: {
+        id: categoryId
+      }
     });
+    if (!category) {
+      throw new ErrorHandler(404, "Category not found!");
+    } else {
+      Categories.findOne({
+        attributes: {
+          exclude: ["createdAt", "updatedAt"]
+        },
+        where: {
+          id: categoryId
+        }
+      }).then(data => {
+        res.status(200).send({
+          data: data
+        });
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
 };
 
 exports.createCategory = (req, res, next) => {
@@ -60,9 +69,10 @@ exports.createCategory = (req, res, next) => {
   Categories.create({
     name: req.body.name
   })
-    .then(result => {
+    .then(data => {
       res.status(201).send({
-        message: "New category added!"
+        message: "New category added!",
+        category: data
       });
     })
     .catch(() => {
@@ -70,45 +80,63 @@ exports.createCategory = (req, res, next) => {
     });
 };
 
-exports.updateCategory = (req, res, next) => {
+exports.updateCategory = async (req, res, next) => {
   const categoryId = req.params.categoryId;
-  // console.log(eventName);
-  Categories.update(
-    {
-      name: req.body.name
-    },
-    {
+
+  try {
+    const category = await Categories.findOne({
       where: {
         id: categoryId
       }
-    }
-  )
-    .then(data => {
-      res.status(200).send({
-        data: data,
-        message: "Category has been updated!"
-      });
-    })
-    .catch(() => {
-      throw new ErrorHandler(500, "Internal server error");
     });
+    if (!category) {
+      throw new ErrorHandler(404, "Category not found!");
+    } else {
+      Categories.update(
+        {
+          name: req.body.name
+        },
+        {
+          where: {
+            id: categoryId
+          }
+        }
+      ).then(data => {
+        res.status(200).send({
+          message: "Category has been updated!",
+          data: data
+        });
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
 };
 
-exports.deleteCategory = (req, res, next) => {
+exports.deleteCategory = async (req, res, next) => {
   const categoryId = req.params.categoryId;
   // console.log(eventName);
-  Categories.destroy({
-    where: {
-      id: categoryId
-    }
-  })
-    .then(data => {
-      res.status(200).send({
-        data: data,
-        message: "Category has been deleted!"
-      });
-    })
-    .catch(() => {
-      throw new ErrorHandler(500, "Internal server error");
+  try {
+    const category = await Categories.findOne({
+      where: {
+        id: categoryId
+      }
     });
+    if (!category) {
+      throw new ErrorHandler(404, "Category not found!");
+    } else {
+      Categories.destroy({
+        where: {
+          id: categoryId
+        }
+      }).then(data => {
+        res.status(200).send({
+          data: data,
+          message: "Category has been deleted!"
+        });
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
 };
