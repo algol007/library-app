@@ -4,7 +4,7 @@ const { Op } = require("sequelize");
 const { handleError, ErrorHandler } = require("../helper/error");
 
 exports.getAllCategories = (req, res, next) => {
-  console.log("Get all categories");
+  // console.log("Get all categories");
   const limit = 5;
   const page = req.query.page;
   const offset = (page - 1) * 5;

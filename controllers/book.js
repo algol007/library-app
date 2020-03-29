@@ -10,17 +10,22 @@ exports.getAllBooks = (req, res, next) => {
   const orderByAuthor = req.query.author;
   const orderByYear = req.query.year;
   const search = req.query.search;
+  const limit = 5;
+  const page = req.query.page;
+  const offset = (page - 1) * 5;
 
   if (orderByTitle) {
-    Books.findAll({
+    Books.findAndCountAll({
       order: [["title", orderByTitle]],
-      attributes: {
-        exclude: ["createdAt", "updatedAt"]
-      },
-      include: { model: Category, as: "bookCategory", attributes: ["name"] }
+      exclude: ["createdAt", "updatedAt"],
+      include: { model: Category, as: "bookCategory", attributes: ["name"] },
+      limit: limit,
+      offset: offset
     })
       .then(data => {
+        const pages = Math.ceil(data.count / limit);
         res.status(200).send({
+          page: `${page} of ${pages}`,
           message: "Order book by title",
           books: data
         });
@@ -29,15 +34,17 @@ exports.getAllBooks = (req, res, next) => {
         throw new ErrorHandler(500, "Internal server error");
       });
   } else if (orderByAuthor) {
-    Books.findAll({
+    Books.findAndCountAll({
       order: [["author", orderByAuthor]],
-      attributes: {
-        exclude: ["createdAt", "updatedAt"]
-      },
-      include: { model: Category, as: "bookCategory", attributes: ["name"] }
+      exclude: ["createdAt", "updatedAt"],
+      include: { model: Category, as: "bookCategory", attributes: ["name"] },
+      limit: limit,
+      offset: offset
     })
       .then(data => {
+        const pages = Math.ceil(data.count / limit);
         res.status(200).send({
+          page: `${page} of ${pages}`,
           message: "Order book by author",
           books: data
         });
@@ -46,16 +53,18 @@ exports.getAllBooks = (req, res, next) => {
         throw new ErrorHandler(500, "Internal server error");
       });
   } else if (orderByYear) {
-    Books.findAll({
+    Books.findAndCountAll({
       order: [["publishedAt", orderByYear]],
-      attributes: {
-        exclude: ["createdAt", "updatedAt"]
-      },
-      include: { model: Category, as: "bookCategory", attributes: ["name"] }
+      exclude: ["createdAt", "updatedAt"],
+      include: { model: Category, as: "bookCategory", attributes: ["name"] },
+      limit: limit,
+      offset: offset
     })
       .then(data => {
+        const pages = Math.ceil(data.count / limit);
         res.status(200).send({
-          message: "Order book by year published",
+          page: `${page} of ${pages}`,
+          message: "Order book by year",
           books: data
         });
       })
@@ -63,21 +72,20 @@ exports.getAllBooks = (req, res, next) => {
         throw new ErrorHandler(500, "Internal server error");
       });
   } else if (search) {
-    Books.findAll({
-      attributes: {
-        exclude: ["createdAt", "updatedAt"]
-      },
-      include: { model: Category, as: "bookCategory", attributes: ["name"] },
-      include: { model: Category, as: "bookCategory", attributes: ["name"] },
+    Books.findAndCountAll({
       where: {
         [Op.or]: [
           { title: { [Op.substring]: search } },
           { description: { [Op.substring]: search } }
         ]
-      }
+      },
+      exclude: ["createdAt", "updatedAt"],
+      include: { model: Category, as: "bookCategory", attributes: ["name"] }
     })
       .then(data => {
+        const pages = Math.ceil(data.count / limit);
         res.status(200).send({
+          message: "Search books",
           books: data
         });
       })
@@ -85,14 +93,17 @@ exports.getAllBooks = (req, res, next) => {
         throw new ErrorHandler(500, "Internal server error");
       });
   } else {
-    Books.findAll({
-      attributes: {
-        exclude: ["createdAt", "updatedAt"]
-      },
-      include: { model: Category, as: "bookCategory", attributes: ["name"] }
+    Books.findAndCountAll({
+      exclude: ["createdAt", "updatedAt"],
+      include: { model: Category, as: "bookCategory", attributes: ["name"] },
+      limit: limit,
+      offset: offset
     })
       .then(data => {
+        const pages = Math.ceil(data.count / limit);
         res.status(200).send({
+          page: `${page} of ${pages}`,
+          message: "Order book by year",
           books: data
         });
       })
@@ -101,6 +112,221 @@ exports.getAllBooks = (req, res, next) => {
       });
   }
 };
+// {
+//   include: { model: Category, as: "bookCategory", attributes: ["name"] }
+// },
+// {
+//   exclude: ["createdAt", "updatedAt"]
+// },
+// { offset: offset, limit: limit }
+// )
+// .then(data => {
+//   const pages = Math.ceil(data.count / limit);
+//   res.status(200).send({
+//     page: `${page} of ${pages}`,
+//     message: "Order book by title",
+//     books: data
+//   });
+// })
+// .catch(() => {
+//   throw new ErrorHandler(500, "Internal server error");
+// });
+//   } else if (orderByAuthor) {
+//     Books.findAndCountAll({
+//       order: [["author", orderByAuthor]],
+//       attributes: {
+//         exclude: ["createdAt", "updatedAt"]
+//       },
+//       include: { model: Category, as: "bookCategory", attributes: ["name"] }
+//     })
+//       .then(data => {
+//         const pages = Math.ceil(data.count / limit);
+//         res.status(200).send({
+//           page: `${page} of ${pages}`,
+//           message: "Order book by author",
+//           books: data
+//         });
+//       })
+//       .catch(() => {
+//         throw new ErrorHandler(500, "Internal server error");
+//       });
+//   } else if (orderByYear) {
+//     Books.findAndCountAll({
+//       order: [["publishedAt", orderByYear]],
+//       attributes: {
+//         exclude: ["createdAt", "updatedAt"]
+//       },
+//       include: { model: Category, as: "bookCategory", attributes: ["name"] }
+//     })
+//       .then(data => {
+//         const pages = Math.ceil(data.count / limit);
+//         res.status(200).send({
+//           page: `${page} of ${pages}`,
+//           message: "Order book by year published",
+//           books: data
+//         });
+//       })
+//       .catch(() => {
+//         throw new ErrorHandler(500, "Internal server error");
+//       });
+//   } else if (search) {
+//     Books.findAndCountAll({
+//       attributes: {
+//         exclude: ["createdAt", "updatedAt"]
+//       },
+//       include: { model: Category, as: "bookCategory", attributes: ["name"] },
+//       where: {
+//         [Op.or]: [
+//           { title: { [Op.substring]: search } },
+//           { description: { [Op.substring]: search } }
+//         ]
+//       }
+//     })
+//       .then(data => {
+//         res.status(200).send({
+//           books: data
+//         });
+//       })
+//       .catch(() => {
+//         throw new ErrorHandler(500, "Internal server error");
+//       });
+//   } else {
+//     Books.findAndCountAll(
+//       { offset: offset, limit: limit },
+//       {
+//         attributes: {
+//           exclude: ["createdAt", "updatedAt"]
+//         },
+//         include: { model: Category, as: "bookCategory", attributes: ["name"] }
+//       }
+//     )
+//       .then(data => {
+//         const pages = Math.ceil(data.count / limit);
+//         res.status(200).send({
+//           page: `${page} of ${pages}`,
+//           books: data
+//         });
+//       })
+//       .catch(() => {
+//         throw new ErrorHandler(500, "Internal server error");
+//       });
+//   }
+// };
+
+// Get all books data
+// exports.getAllBooks = (req, res, next) => {
+//   // console.log("Get all books data");
+//   const orderByTitle = req.query.title;
+//   const orderByAuthor = req.query.author;
+//   const orderByYear = req.query.year;
+//   const search = req.query.search;
+//   const limit = 5;
+//   const page = req.query.page;
+//   const offset = (page - 1) * 5;
+
+//   if (orderByTitle) {
+//     Books.findAndCountAll(
+//       {
+//         order: [["title", orderByTitle]],
+//         attributes: {
+//           exclude: ["createdAt", "updatedAt"]
+//         },
+//         include: { model: Category, as: "bookCategory", attributes: ["name"] }
+//       },
+//       { offset: offset, limit: limit }
+//     )
+//       .then(data => {
+//         const pages = Math.ceil(data.count / limit);
+//         res.status(200).send({
+//           page: `${page} of ${pages}`,
+//           message: "Order book by title",
+//           books: data
+//         });
+//       })
+//       .catch(() => {
+//         throw new ErrorHandler(500, "Internal server error");
+//       });
+//   } else if (orderByAuthor) {
+//     Books.findAndCountAll({
+//       order: [["author", orderByAuthor]],
+//       attributes: {
+//         exclude: ["createdAt", "updatedAt"]
+//       },
+//       include: { model: Category, as: "bookCategory", attributes: ["name"] }
+//     })
+//       .then(data => {
+//         const pages = Math.ceil(data.count / limit);
+//         res.status(200).send({
+//           page: `${page} of ${pages}`,
+//           message: "Order book by author",
+//           books: data
+//         });
+//       })
+//       .catch(() => {
+//         throw new ErrorHandler(500, "Internal server error");
+//       });
+//   } else if (orderByYear) {
+//     Books.findAndCountAll({
+//       order: [["publishedAt", orderByYear]],
+//       attributes: {
+//         exclude: ["createdAt", "updatedAt"]
+//       },
+//       include: { model: Category, as: "bookCategory", attributes: ["name"] }
+//     })
+//       .then(data => {
+//         const pages = Math.ceil(data.count / limit);
+//         res.status(200).send({
+//           page: `${page} of ${pages}`,
+//           message: "Order book by year published",
+//           books: data
+//         });
+//       })
+//       .catch(() => {
+//         throw new ErrorHandler(500, "Internal server error");
+//       });
+//   } else if (search) {
+//     Books.findAndCountAll({
+//       attributes: {
+//         exclude: ["createdAt", "updatedAt"]
+//       },
+//       include: { model: Category, as: "bookCategory", attributes: ["name"] },
+//       where: {
+//         [Op.or]: [
+//           { title: { [Op.substring]: search } },
+//           { description: { [Op.substring]: search } }
+//         ]
+//       }
+//     })
+//       .then(data => {
+//         res.status(200).send({
+//           books: data
+//         });
+//       })
+//       .catch(() => {
+//         throw new ErrorHandler(500, "Internal server error");
+//       });
+//   } else {
+//     Books.findAndCountAll(
+//       { offset: offset, limit: limit },
+//       {
+//         attributes: {
+//           exclude: ["createdAt", "updatedAt"]
+//         },
+//         include: { model: Category, as: "bookCategory", attributes: ["name"] }
+//       }
+//     )
+//       .then(data => {
+//         const pages = Math.ceil(data.count / limit);
+//         res.status(200).send({
+//           page: `${page} of ${pages}`,
+//           books: data
+//         });
+//       })
+//       .catch(() => {
+//         throw new ErrorHandler(500, "Internal server error");
+//       });
+//   }
+// };
 
 exports.getBookById = async (req, res, next) => {
   // console.log("Get book data by Id");
