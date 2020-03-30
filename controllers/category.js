@@ -1,71 +1,67 @@
 const Categories = require("../models").category;
-
-// Get all categories data
-// exports.getAllCategories = (req, res, next) => {
-//   console.log("Get all categories");
-//   Categories.findAll(
-//     // { limit: 3 },
-//     {
-//       attributes: {
-//         exclude: ["createdAt", "updatedAt"]
-//       }
-//     }
-//   )
-//     .then(data => {
-//       res.status(200).send({
-//         categories: data
-//       });
-//     })
-//     .catch(err => {
-//       err.status(500).json({
-//         message: `Error ${err}`
-//       });
-//     });
-// };
+const Books = require("../models").book;
+const { Op } = require("sequelize");
+const { handleError, ErrorHandler } = require("../helper/error");
 
 exports.getAllCategories = (req, res, next) => {
-  console.log("Get all categories");
-  Categories.findAll(
-    // { limit: 3 },
+  // console.log("Get all categories");
+  const limit = 5;
+  const page = req.query.page;
+  const offset = (page - 1) * 5;
+  Categories.findAndCountAll(
+    { offset: offset, limit: limit },
     {
       attributes: {
         exclude: ["createdAt", "updatedAt"]
+      },
+      include: {
+        model: Books,
+        as: "bookCategory",
+        attributes: ["title"]
       }
     }
   )
     .then(data => {
+      const pages = Math.ceil(data.count / limit);
       res.status(200).send({
+        page: `${page} of ${pages}`,
         categories: data
+        // error.errorHandler
       });
     })
-    .catch(err => {
-      err.status(500).json({
-        message: `Error ${err}`
-      });
+    .catch(() => {
+      throw new ErrorHandler(500, "Internal server error");
     });
 };
 
-exports.getCategoryById = (req, res, next) => {
+exports.getCategoryById = async (req, res, next) => {
   const categoryId = req.params.categoryId;
   // console.log(eventName);
-  Categories.findOne({
-    attributes: {
-      exclude: ["createdAt", "updatedAt"]
-    },
-    where: {
-      id: categoryId
-    }
-  })
-    .then(data => {
-      res.status(200).send({
-        data: data
-      });
-    })
-    .catch(err => {
-      err.status(500).json({
-        message: `Error ${err}`
-      });
+  try {
+    const category = await Categories.findOne({
+      where: {
+        id: categoryId
+      }
     });
+    if (!category) {
+      throw new ErrorHandler(404, "Category not found!");
+    } else {
+      Categories.findOne({
+        attributes: {
+          exclude: ["createdAt", "updatedAt"]
+        },
+        where: {
+          id: categoryId
+        }
+      }).then(data => {
+        res.status(200).send({
+          data: data
+        });
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
 };
 
 exports.createCategory = (req, res, next) => {
@@ -73,61 +69,74 @@ exports.createCategory = (req, res, next) => {
   Categories.create({
     name: req.body.name
   })
-    .then(result => {
+    .then(data => {
       res.status(201).send({
-        message: "New category added!"
+        message: "New category added!",
+        category: data
       });
     })
-    .catch(err => {
-      err.status(500).json({
-        message: `Error ${err}`
-      });
+    .catch(() => {
+      throw new ErrorHandler(500, "Internal server error");
     });
 };
 
-exports.updateCategory = (req, res, next) => {
+exports.updateCategory = async (req, res, next) => {
   const categoryId = req.params.categoryId;
-  // console.log(eventName);
-  Categories.update(
-    {
-      name: req.body.name
-    },
-    {
+
+  try {
+    const category = await Categories.findOne({
       where: {
         id: categoryId
       }
-    }
-  )
-    .then(data => {
-      res.status(200).send({
-        data: data,
-        message: "Category has been updated!"
-      });
-    })
-    .catch(err => {
-      err.status(500).json({
-        message: `Error ${err}`
-      });
     });
+    if (!category) {
+      throw new ErrorHandler(404, "Category not found!");
+    } else {
+      Categories.update(
+        {
+          name: req.body.name
+        },
+        {
+          where: {
+            id: categoryId
+          }
+        }
+      ).then(data => {
+        res.status(200).send({
+          message: "Category has been updated!",
+          data: data
+        });
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
 };
 
-exports.deleteCategory = (req, res, next) => {
+exports.deleteCategory = async (req, res, next) => {
   const categoryId = req.params.categoryId;
   // console.log(eventName);
-  Categories.destroy({
-    where: {
-      id: categoryId
-    }
-  })
-    .then(data => {
-      res.status(200).send({
-        data: data,
-        message: "Category has been deleted!"
-      });
-    })
-    .catch(err => {
-      err.status(500).json({
-        message: `Error ${err}`
-      });
+  try {
+    const category = await Categories.findOne({
+      where: {
+        id: categoryId
+      }
     });
+    if (!category) {
+      throw new ErrorHandler(404, "Category not found!");
+    } else {
+      Categories.destroy({
+        where: {
+          id: categoryId
+        }
+      }).then(data => {
+        res.status(200).send({
+          data: data,
+          message: "Category has been deleted!"
+        });
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
 };
