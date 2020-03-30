@@ -15,43 +15,16 @@ exports.signUp = (req, res, next) => {
     role: req.body.role || "user",
     is_active: 1
   })
-    .then(result => {
+    .then(data => {
       res.status(201).send({
-        email: result.email,
-        message: "User has been created!"
+        message: "User has been created!",
+        user: data
       });
     })
     .catch(() => {
       throw new ErrorHandler(500, "Internal server error");
     });
 };
-
-// Sign In
-// exports.signIn = (req, res, next) => {
-//   Users.findOne({
-//     where: {
-//       email: req.body.email
-//     }
-//   })
-//     .then(data => {
-//       if (data) {
-//         const authorized = bcrypt.compareSync(req.body.password, data.password);
-//         if (authorized) {
-//           res.status(200).send({
-//             email: data.email,
-//             message: "Login Successfuly!"
-//           });
-//         } else {
-//           res.status(401).json({
-//             message: "Wrong Password!"
-//           });
-//         }
-//       }
-//     })
-//     .catch(() => {
-//       throw new ErrorHandler(500, "Internal server error");
-//     });
-// };
 
 exports.signIn = async (req, res, next) => {
   try {
@@ -61,7 +34,7 @@ exports.signIn = async (req, res, next) => {
       }
     });
     if (!user) {
-      throw new ErrorHandler(403, "You are not registered! Please signup.");
+      throw new ErrorHandler(404, "You are not registered! Please signup.");
     } else {
       Users.findOne({
         where: {
@@ -135,8 +108,8 @@ exports.updateUser = async (req, res, next) => {
           email: req.body.email,
           password: bcrypt.hashSync(req.body.password, salt),
           image: req.body.image,
-          role: req.body.user || "user",
-          is_active: 1
+          role: "user",
+          is_active: "1"
         },
         {
           where: {
@@ -146,7 +119,7 @@ exports.updateUser = async (req, res, next) => {
       ).then(data => {
         res.status(200).send({
           message: "User has been updated!",
-          data: data
+          user: data
         });
       });
     }
@@ -161,7 +134,7 @@ exports.getAllUser = (req, res, next) => {
   Users.findAll()
     .then(data => {
       res.status(200).send({
-        Users: data
+        users: data
       });
     })
     .catch(err => {
@@ -177,7 +150,7 @@ exports.deleteUser = async (req, res, next) => {
   try {
     const user = await Users.findOne({
       where: {
-        id: userId
+        id: userIdnpm
       }
     });
     if (!user) {
