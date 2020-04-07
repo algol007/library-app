@@ -8,7 +8,7 @@ exports.createCart = (req, res, next) => {
     userId: req.body.userId,
     bookId: req.body.bookId,
     quantity: req.body.quantity,
-    total: req.body.total
+    status: req.body.status
   })
     .then(data => {
       res.status(201).send({

@@ -18,7 +18,7 @@ module.exports = {
         type: Sequelize.STRING
       },
       isbn: {
-        type: Sequelize.BIGINT
+        type: Sequelize.STRING
       },
       isAvailable: {
         type: Sequelize.BOOLEAN

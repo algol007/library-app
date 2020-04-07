@@ -10,9 +10,9 @@ exports.getAllBooks = (req, res, next) => {
   const orderByAuthor = req.query.author;
   const orderByYear = req.query.year;
   const search = req.query.search;
-  const limit = 5;
+  const limit = 8;
   const page = req.query.page;
-  const offset = (page - 1) * 5;
+  const offset = (page - 1) * 8;
 
   if (orderByTitle) {
     Books.findAndCountAll({
