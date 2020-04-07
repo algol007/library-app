@@ -17,8 +17,8 @@ module.exports = {
       quantity: {
         type: Sequelize.INTEGER
       },
-      total: {
-        type: Sequelize.INTEGER
+      status: {
+        type: Sequelize.BOOLEAN
       },
       createdAt: {
         allowNull: false,

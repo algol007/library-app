@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
       userId: DataTypes.NUMBER,
       bookId: DataTypes.NUMBER,
       quantity: DataTypes.NUMBER,
-      total: DataTypes.NUMBER
+      status: DataTypes.BOOLEAN
     },
     {}
   );
